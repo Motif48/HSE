@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Leave a Review ⭐</h2>
+
+<form id="reviewForm">
+  <input type="text" id="name" placeholder="Your Name" required>
+
+  <select id="rating">
+    <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+    <option value="4">⭐⭐⭐⭐ (4)</option>
+    <option value="3">⭐⭐⭐ (3)</option>
+    <option value="2">⭐⭐ (2)</option>
+    <option value="1">⭐ (1)</option>
+  </select>
+
+  <textarea id="comment" placeholder="Write your review..." required></textarea>
+
+  <button type="submit">Submit Review</button>
+</form>
+
+<div id="reviews"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
+
+<script>
+// 🔥 Firebase config (ADD YOURS)
+firebase.initializeApp({
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_PROJECT",
+  projectId: "YOUR_PROJECT"
+});
+
+const db = firebase.firestore();
+
+// 📝 Submit review
+document.getElementById("reviewForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  db.collection("reviews").add({
+    name: document.getElementById("name").value,
+    rating: document.getElementById("rating").value,
+    comment: document.getElementById("comment").value,
+    time: new Date()
+  }).then(()=>{
+    alert("Thank you for your review!");
+    loadReviews();
+  });
+});
+
+// 📥 Load reviews
+function loadReviews(){
+  db.collection("reviews").orderBy("time","desc").get()
+  .then(snapshot=>{
+    let html = "<h3>Customer Reviews</h3>";
+
+    snapshot.forEach(doc=>{
+      const r = doc.data();
+
+      html += `
+        <div class="review">
+          <h4>${r.name} - ${"⭐".repeat(r.rating)}</h4>
+          <p>${r.comment}</p>
+        </div>
+      `;
+    });
+
+    document.getElementById("reviews").innerHTML = html;
+  });
+}
+
+loadReviews();
+</script>
+
+</body>
+</html>
